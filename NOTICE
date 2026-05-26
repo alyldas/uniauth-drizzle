@@ -1,0 +1,3 @@
+UniAuth Drizzle Adapter
+
+This package implements Drizzle/Postgres persistence for UniAuth.
