@@ -1,0 +1,18 @@
+name: Security note
+description: Read this before reporting security-sensitive behavior.
+title: 'security: '
+labels:
+  - security
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not disclose vulnerabilities publicly. Do not include exploit steps, secrets, tokens, session data, private logs, or reproduction steps for security bugs in a public issue.
+
+  - type: textarea
+    id: non-sensitive-context
+    attributes:
+      label: Non-sensitive context
+      description: If this is not a vulnerability disclosure, describe the public-safe documentation, policy, or coordination question.
+    validations:
+      required: true

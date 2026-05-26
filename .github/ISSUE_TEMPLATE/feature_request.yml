@@ -1,0 +1,33 @@
+name: Feature request
+description: Propose a new capability or integration.
+title: 'feat: '
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What user or integration problem should this package solve?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Adapter behavior
+        - Public API
+        - Documentation
+        - Package/release tooling
+        - Other
+    validations:
+      required: true
