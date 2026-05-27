@@ -3,3 +3,5 @@ dist/
 coverage/
 .npm-cache/
 *.tgz
+CHANGELOG.md
+.release-please-manifest.json
