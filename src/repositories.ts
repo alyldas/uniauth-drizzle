@@ -32,11 +32,11 @@ import type { DrizzleExecutor } from './types.js'
 type GetDb = () => DrizzleExecutor
 
 export function createUserRepo(getDb: GetDb): UserRepo {
-  const repo: UserRepo = {
-    findById: async (id) =>
-      first(await getDb().select().from(uniauthUsers).where(eq(uniauthUsers.id, id))).map(
-        mapUserRow,
-      ),
+  const findById: UserRepo['findById'] = async (id) =>
+    first(await getDb().select().from(uniauthUsers).where(eq(uniauthUsers.id, id))).map(mapUserRow)
+
+  return {
+    findById,
     create: async (user) =>
       required(
         await getDb()
@@ -55,7 +55,7 @@ export function createUserRepo(getDb: GetDb): UserRepo {
         mapUserRow,
       ),
     update: async (id, patch) => {
-      const existing = await repo.findById(id)
+      const existing = await findById(id)
 
       if (!existing) {
         throw new UniAuthError(UniAuthErrorCode.UserNotFound, 'User was not found.')
@@ -80,16 +80,56 @@ export function createUserRepo(getDb: GetDb): UserRepo {
       )
     },
   }
-
-  return repo
 }
 
 export function createIdentityRepo(getDb: GetDb): IdentityRepo {
-  const repo: IdentityRepo = {
-    findById: async (id) =>
-      first(await getDb().select().from(uniauthIdentities).where(eq(uniauthIdentities.id, id))).map(
+  const findById: IdentityRepo['findById'] = async (id) =>
+    first(await getDb().select().from(uniauthIdentities).where(eq(uniauthIdentities.id, id))).map(
+      mapIdentityRow,
+    )
+
+  const update: IdentityRepo['update'] = async (id, patch) => {
+    const existing = await findById(id)
+
+    if (!existing) {
+      throw new UniAuthError(UniAuthErrorCode.IdentityNotFound, 'Identity was not found.')
+    }
+
+    const updatePatch = buildPatch(patch, {
+      userId: 'userId',
+      provider: 'provider',
+      providerUserId: 'providerUserId',
+      status: 'status',
+      email: 'email',
+      emailVerified: 'emailVerified',
+      phone: 'phone',
+      phoneVerified: 'phoneVerified',
+      trust: 'trust',
+      updatedAt: 'updatedAt',
+      disabledAt: 'disabledAt',
+      metadata: 'metadata',
+    })
+
+    if (!updatePatch) {
+      return existing
+    }
+
+    try {
+      return required(
+        await getDb()
+          .update(uniauthIdentities)
+          .set(updatePatch)
+          .where(eq(uniauthIdentities.id, id))
+          .returning(),
         mapIdentityRow,
-      ),
+      )
+    } catch (error) {
+      throw mapIdentityWriteError(error)
+    }
+  }
+
+  return {
+    findById,
     findByProviderUserId: async (provider, providerUserId) =>
       first(
         await getDb()
@@ -169,45 +209,7 @@ export function createIdentityRepo(getDb: GetDb): IdentityRepo {
         throw mapIdentityWriteError(error)
       }
     },
-    update: async (id, patch) => {
-      const existing = await repo.findById(id)
-
-      if (!existing) {
-        throw new UniAuthError(UniAuthErrorCode.IdentityNotFound, 'Identity was not found.')
-      }
-
-      const update = buildPatch(patch, {
-        userId: 'userId',
-        provider: 'provider',
-        providerUserId: 'providerUserId',
-        status: 'status',
-        email: 'email',
-        emailVerified: 'emailVerified',
-        phone: 'phone',
-        phoneVerified: 'phoneVerified',
-        trust: 'trust',
-        updatedAt: 'updatedAt',
-        disabledAt: 'disabledAt',
-        metadata: 'metadata',
-      })
-
-      if (!update) {
-        return existing
-      }
-
-      try {
-        return required(
-          await getDb()
-            .update(uniauthIdentities)
-            .set(update)
-            .where(eq(uniauthIdentities.id, id))
-            .returning(),
-          mapIdentityRow,
-        )
-      } catch (error) {
-        throw mapIdentityWriteError(error)
-      }
-    },
+    update,
     disableForUserIfAnotherActive: async (id, userId, patch) => {
       const query = getDb()
         .select()
@@ -234,15 +236,13 @@ export function createIdentityRepo(getDb: GetDb): IdentityRepo {
         )
       }
 
-      return repo.update(id, patch)
+      return update(id, patch)
     },
   }
-
-  return repo
 }
 
 export function createCredentialRepo(getDb: GetDb): CredentialRepo {
-  const repo: CredentialRepo = {
+  return {
     findPasswordByEmail: async (email) =>
       first(
         await getDb()
@@ -327,16 +327,16 @@ export function createCredentialRepo(getDb: GetDb): CredentialRepo {
       }
     },
   }
-
-  return repo
 }
 
 export function createVerificationRepo(getDb: GetDb): VerificationRepo {
-  const repo: VerificationRepo = {
-    findById: async (id) =>
-      first(
-        await getDb().select().from(uniauthVerifications).where(eq(uniauthVerifications.id, id)),
-      ).map(mapVerificationRow),
+  const findById: VerificationRepo['findById'] = async (id) =>
+    first(
+      await getDb().select().from(uniauthVerifications).where(eq(uniauthVerifications.id, id)),
+    ).map(mapVerificationRow)
+
+  return {
+    findById,
     findByIdForUpdate: async (id) =>
       first(
         await forUpdate(
@@ -364,7 +364,7 @@ export function createVerificationRepo(getDb: GetDb): VerificationRepo {
         mapVerificationRow,
       ),
     update: async (id, patch) => {
-      const existing = await repo.findById(id)
+      const existing = await findById(id)
 
       if (!existing) {
         throw new UniAuthError(UniAuthErrorCode.VerificationNotFound, 'Verification was not found.')
@@ -396,16 +396,16 @@ export function createVerificationRepo(getDb: GetDb): VerificationRepo {
       )
     },
   }
-
-  return repo
 }
 
 export function createSessionRepo(getDb: GetDb): SessionRepo {
-  const repo: SessionRepo = {
-    findById: async (id) =>
-      first(await getDb().select().from(uniauthSessions).where(eq(uniauthSessions.id, id))).map(
-        mapSessionRow,
-      ),
+  const findById: SessionRepo['findById'] = async (id) =>
+    first(await getDb().select().from(uniauthSessions).where(eq(uniauthSessions.id, id))).map(
+      mapSessionRow,
+    )
+
+  return {
+    findById,
     findByTokenHash: async (tokenHash) =>
       first(
         await getDb()
@@ -446,7 +446,7 @@ export function createSessionRepo(getDb: GetDb): SessionRepo {
       }
     },
     update: async (id, patch) => {
-      const existing = await repo.findById(id)
+      const existing = await findById(id)
 
       if (!existing) {
         throw new UniAuthError(UniAuthErrorCode.SessionNotFound, 'Session was not found.')
@@ -480,8 +480,6 @@ export function createSessionRepo(getDb: GetDb): SessionRepo {
       }
     },
   }
-
-  return repo
 }
 
 export function createAuditLogRepo(getDb: GetDb): AuditLogRepo {
