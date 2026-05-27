@@ -1,5 +1,7 @@
 # UniAuth Drizzle Adapter
 
+[![GitHub Packages](https://img.shields.io/static/v1?label=GitHub%20Packages&message=%40alyldas%2Funiauth-drizzle&color=24292f&logo=github)](https://github.com/users/alyldas/packages/npm/package/uniauth-drizzle)
+
 Drizzle storage adapter for `@alyldas/uniauth-core`.
 
 This package implements only the UniAuth storage contracts:
@@ -18,6 +20,14 @@ operations outside the UniAuth repository contracts. This package owns only tabl
 repository implementations, and transaction wiring for UniAuth.
 
 ## Install
+
+Configure the GitHub Packages registry for the package scope before installing:
+
+```ini
+@alyldas:registry=https://npm.pkg.github.com
+```
+
+GitHub Packages can require authentication for package reads. Use a token with `read:packages` in local npm config or CI secrets; do not commit tokens.
 
 ```sh
 npm install @alyldas/uniauth-core @alyldas/uniauth-drizzle drizzle-orm
