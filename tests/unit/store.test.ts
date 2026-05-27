@@ -8,13 +8,13 @@ import {
   asUserId,
   asVerificationId,
 } from '@alyldas/uniauth-core'
-import { createDrizzleAuthStore } from '../src/store.js'
+import { createDrizzleAuthStore } from '../../src/store.js'
 import type {
   DrizzleExecutor,
   DrizzleInsertBuilder,
   DrizzleSelectBuilder,
   DrizzleUpdateBuilder,
-} from '../src/types.js'
+} from '../../src/types.js'
 
 type QueryStep =
   | {
